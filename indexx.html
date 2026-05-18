@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bae — Send Appointment</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fff0f6;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .hearts-bg {
+      position: relative;
+      border-radius: 20px;
+      padding: 1.5rem;
+      overflow: hidden;
+      background: #fff0f6;
+      width: 100%;
+      max-width: 520px;
+    }
+    .hearts-bg::before {
+      content: '♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡';
+      position: absolute;
+      inset: 0;
+      font-size: 18px;
+      color: #f9b8d0;
+      line-height: 2;
+      word-break: break-all;
+      padding: 8px;
+      pointer-events: none;
+      letter-spacing: 6px;
+    }
+    .bae-card {
+      position: relative;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid #f4a0bc;
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    .bae-header {
+      background: linear-gradient(135deg, #f9b8d0, #f7a0c4);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+    .bae-header span { font-size: 22px; font-weight: 500; color: #8b1a4a; letter-spacing: 2px; }
+    .bae-subtitle { font-size: 13px; color: #b05070; margin-bottom: 1.25rem; }
+    .field-group { display: flex; flex-direction: column; gap: 14px; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { font-size: 12px; font-weight: 500; color: #b05070; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 5px; }
+    input[type="text"], input[type="date"], input[type="time"] {
+      width: 100%;
+      border: 1px solid #f4a0bc;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 14px;
+      background: #fff5f9;
+      color: #5a0a2a;
+      outline: none;
+      font-family: inherit;
+    }
+    input::placeholder { color: #d4849c; }
+    input:focus { border-color: #e0558a; box-shadow: 0 0 0 2px rgba(224,85,138,0.15); }
+    .bae-btn {
+      margin-top: 1.25rem;
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #f06292, #e91e8c);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .bae-btn:hover { opacity: 0.9; }
+    .bae-btn:active { transform: scale(0.98); }
+    .sms-box {
+      margin-top: 1.25rem;
+      background: #fff5f9;
+      border: 1px solid #f4a0bc;
+      border-radius: 14px;
+      padding: 1.1rem;
+    }
+    .sms-label { font-size: 12px; font-weight: 500; color: #b05070; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .sms-bubble {
+      background: #fff;
+      border: 1px solid #f4a0bc;
+      border-radius: 12px 12px 12px 4px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #5a0a2a;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      font-family: inherit;
+      margin-bottom: 12px;
+      word-break: break-all;
+    }
+    .copy-btn {
+      width: 100%;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #f06292, #e91e8c);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .copy-btn:hover { opacity: 0.9; }
+    .hint { font-size: 12px; color: #c07090; text-align: center; margin-top: 8px; }
+    .copy-text-hidden { position: absolute; left: -9999px; top: -9999px; }
+  </style>
+</head>
+<body>
+<div class="hearts-bg">
+  <div class="bae-card">
+    <div class="bae-header"><span>&#9825; bae &#9825;</span></div>
+    <p class="bae-subtitle">Fill in the details — then send the link to your client.</p>
+    <div class="field-group">
+      <div>
+        <label for="fieldRequest">Request</label>
+        <input type="text" id="fieldRequest" placeholder="e.g. Hair appointment, consultation..." />
+      </div>
+      <div class="two-col">
+        <div>
+          <label for="fieldDate">Date</label>
+          <input type="date" id="fieldDate" />
+        </div>
+        <div>
+          <label for="fieldTime">Time</label>
+          <input type="time" id="fieldTime" />
+        </div>
+      </div>
+      <div>
+        <label for="fieldPlace">The spot</label>
+        <input type="text" id="fieldPlace" placeholder="e.g. 123 Main St" />
+      </div>
+      <div>
+        <label for="fieldNotes">Notes <span style="font-size:11px;color:#d4849c;text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <input type="text" id="fieldNotes" placeholder="Any extra info..." />
+      </div>
+    </div>
+    <button class="bae-btn" id="genBtn">&#9825; Generate link &amp; SMS</button>
+    <div class="sms-box" id="smsBox" style="display:none;">
+      <p class="sms-label">Your SMS to send</p>
+      <div class="sms-bubble" id="smsBubble"></div>
+      <button class="copy-btn" id="copyBtn">&#128203; Copy &amp; paste into your text message</button>
+      <p class="hint">After copying, open your messages app and paste &#128236;</p>
+    </div>
+    <textarea class="copy-text-hidden" id="copyText"></textarea>
+  </div>
+</div>
+<script>
+  function formatDate(d) {
+    if (!d) return '';
+    var parts = d.split('-');
+    var y = parts[0], m = parts[1], day = parts[2];
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var dateObj = new Date(parseInt(y), parseInt(m)-1, parseInt(day));
+    return days[dateObj.getDay()] + ', ' + months[parseInt(m)-1] + ' ' + parseInt(day) + ', ' + y;
+  }
+  function formatTime(t) {
+    if (!t) return '';
+    var parts = t.split(':');
+    var hr = parseInt(parts[0]), min = parts[1];
+    var ampm = hr >= 12 ? 'PM' : 'AM';
+    var hr12 = hr % 12 || 12;
+    return hr12 + ':' + min + ' ' + ampm;
+  }
+  document.getElementById('genBtn').addEventListener('click', function() {
+    var request = document.getElementById('fieldRequest').value.trim();
+    var date    = document.getElementById('fieldDate').value;
+    var time    = document.getElementById('fieldTime').value;
+    var place   = document.getElementById('fieldPlace').value.trim();
+    var notes   = document.getElementById('fieldNotes').value.trim();
+
+    var params = new URLSearchParams();
+    if (request) params.set('r', request);
+    if (date)    params.set('d', date);
+    if (time)    params.set('t', time);
+    if (place)   params.set('p', place);
+    if (notes)   params.set('n', notes);
+
+    var baseURL = 'https://suzie-coach.github.io/bae/confirm.html';
+    var link = baseURL + '?' + params.toString();
+
+    var msg = '♡ bae — Appointment Request ♡\n\n';
+    if (request) msg += 'Request: ' + request + '\n';
+    if (date)    msg += 'Date: ' + formatDate(date) + '\n';
+    if (time)    msg += 'Time: ' + formatTime(time) + '\n';
+    if (place)   msg += 'The spot: ' + place + '\n';
+    if (notes)   msg += 'Notes: ' + notes + '\n';
+    msg += '\nTap to confirm or decline ♡\n' + link;
+
+    document.getElementById('smsBubble').textContent = msg;
+    document.getElementById('copyText').value = msg;
+    document.getElementById('smsBox').style.display = 'block';
+  });
+  document.getElementById('copyBtn').addEventListener('click', function() {
+    var text = document.getElementById('copyText').value;
+    var btn  = document.getElementById('copyBtn');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = '✓ Copied! Now paste into your messages app.';
+        setTimeout(function() { btn.innerHTML = '&#128203; Copy &amp; paste into your text message'; }, 3000);
+      });
+    } else {
+      var ta = document.getElementById('copyText');
+      ta.select();
+      document.execCommand('copy');
+      btn.textContent = '✓ Copied! Now paste into your messages app.';
+      setTimeout(function() { btn.innerHTML = '&#128203; Copy &amp; paste into your text message'; }, 3000);
+    }
+  });
+</script>
+</body>
+</html>
