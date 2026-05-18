@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bae — Appointment Request</title>
+  <!-- Link preview meta tags -->
+  <meta property="og:title" content="♡ bae — You have an appointment request!" />
+  <meta property="og:description" content="Tap to view your appointment details and accept or decline." />
+  <meta property="og:image" content="https://suzie-coach.github.io/bae/preview.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="♡ bae — Appointment Request" />
+  <meta name="twitter:description" content="Tap to view your appointment and accept or decline." />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fff0f6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── SPLASH ── */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(160deg, #fce4ec, #f8bbd0, #f48fb1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    #splash.hide {
+      opacity: 0;
+      transform: scale(1.05);
+      pointer-events: none;
+    }
+    .splash-hearts {
+      font-size: 30px;
+      color: #e91e8c;
+      margin-bottom: 16px;
+      animation: sway 2s ease-in-out infinite;
+    }
+    .splash-logo {
+      font-size: 56px;
+      font-weight: 700;
+      color: #8b1a4a;
+      letter-spacing: 8px;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    .splash-sub {
+      font-size: 15px;
+      color: #c2185b;
+      margin-top: 16px;
+      letter-spacing: 1px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.9s forwards;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    @keyframes sway {
+      0%, 100% { transform: rotate(-10deg); }
+      50% { transform: rotate(10deg); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .float-heart {
+      position: absolute;
+      font-size: 22px;
+      animation: floatUp 3s ease-in infinite;
+      opacity: 0;
+      color: #f48fb1;
+    }
+    @keyframes floatUp {
+      0%   { opacity: 0; transform: translateY(0) scale(0.8); }
+      20%  { opacity: 1; }
+      80%  { opacity: 0.4; }
+      100% { opacity: 0; transform: translateY(-240px) scale(1.2); }
+    }
+
+    /* ── MAIN ── */
+    #main {
+      opacity: 0;
+      transition: opacity 0.9s ease;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    #main.show { opacity: 1; }
+
+    .hearts-bg {
+      position: relative;
+      border-radius: 20px;
+      padding: 1.5rem;
+      overflow: hidden;
+      background: #fff0f6;
+      width: 100%;
+      max-width: 520px;
+    }
+    .hearts-bg::before {
+      content: '♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡';
+      position: absolute;
+      inset: 0;
+      font-size: 18px;
+      color: #f9b8d0;
+      line-height: 2;
+      word-break: break-all;
+      padding: 8px;
+      pointer-events: none;
+      letter-spacing: 6px;
+    }
+    .bae-card {
+      position: relative;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid #f4a0bc;
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    .bae-header {
+      background: linear-gradient(135deg, #f9b8d0, #f7a0c4);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .bae-header span { font-size: 22px; font-weight: 500; color: #8b1a4a; letter-spacing: 2px; }
+    .bae-tagline { font-size: 13px; color: #b05070; text-align: center; margin-bottom: 1.25rem; margin-top: 6px; }
+
+    .appt-details {
+      background: #fff5f9;
+      border: 1px solid #f4a0bc;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1.25rem;
+    }
+    .appt-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 7px 0;
+      border-bottom: 1px solid #fce4ec;
+      gap: 10px;
+    }
+    .appt-row:last-child { border-bottom: none; }
+    .appt-key { color: #b05070; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; min-width: 70px; flex-shrink: 0; }
+    .appt-val { color: #5a0a2a; font-size: 14px; text-align: right; }
+
+    .question { font-size: 15px; color: #8b1a4a; font-weight: 500; text-align: center; margin-bottom: 1rem; }
+    .accept-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .btn-yes {
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #f06292, #e91e8c);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-no {
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      background: #fff;
+      color: #b05070;
+      border: 1px solid #f4a0bc;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-yes:hover { opacity: 0.9; }
+    .btn-no:hover { background: #fce4ec; }
+    .btn-yes:disabled, .btn-no:disabled { opacity: 0.35; cursor: default; }
+
+    /* ── THANK YOU SCREEN ── */
+    #thankYou {
+      display: none;
+      text-align: center;
+      padding: 2rem 1rem;
+      animation: fadeUp 0.6s ease forwards;
+    }
+    .ty-emoji { font-size: 52px; margin-bottom: 12px; }
+    .ty-title { font-size: 26px; font-weight: 600; color: #8b1a4a; margin-bottom: 8px; }
+    .ty-sub { font-size: 15px; color: #b05070; margin-bottom: 1.5rem; line-height: 1.6; }
+    .ty-hearts { font-size: 24px; color: #f48fb1; letter-spacing: 6px; animation: sway 2s ease-in-out infinite; }
+    .ty-hint { font-size: 12px; color: #c07090; margin-top: 1rem; }
+
+    .ty-declined .ty-title { color: #888; }
+    .ty-declined .ty-sub { color: #aaa; }
+    .ty-declined .ty-hearts { color: #ddd; }
+  </style>
+</head>
+<body>
+
+  <!-- SPLASH -->
+  <div id="splash">
+    <div class="splash-hearts">♡ ♡ ♡</div>
+    <div class="splash-logo">bae</div>
+    <div class="splash-sub">you have an appointment request</div>
+    <span class="float-heart" style="left:8%;  bottom:15%; animation-delay:0s;">♡</span>
+    <span class="float-heart" style="left:22%; bottom:10%; animation-delay:0.5s;">♡</span>
+    <span class="float-heart" style="left:48%; bottom:8%;  animation-delay:1s;">♡</span>
+    <span class="float-heart" style="left:68%; bottom:12%; animation-delay:0.3s;">♡</span>
+    <span class="float-heart" style="left:84%; bottom:20%; animation-delay:0.8s;">♡</span>
+    <span class="float-heart" style="left:38%; bottom:5%;  animation-delay:1.4s;">♡</span>
+    <span class="float-heart" style="left:58%; bottom:18%; animation-delay:0.2s;">♡</span>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="main">
+    <div class="hearts-bg">
+      <div class="bae-card">
+
+        <div id="appointmentView">
+          <div class="bae-header"><span>&#9825; bae &#9825;</span></div>
+          <p class="bae-tagline">You have an appointment request ♡</p>
+          <div class="appt-details" id="apptDetails"></div>
+          <p class="question">Do you accept this appointment?</p>
+          <div class="accept-btns">
+            <button class="btn-yes" id="btnYes">&#9825; Yes, accept</button>
+            <button class="btn-no"  id="btnNo">&#10005; No, decline</button>
+          </div>
+        </div>
+
+        <!-- THANK YOU -->
+        <div id="thankYou">
+          <div class="ty-emoji" id="tyEmoji">&#9825;</div>
+          <div class="ty-title" id="tyTitle">Appointment Accepted!</div>
+          <div class="ty-sub"  id="tySub">See you soon ♡<br>We can't wait!</div>
+          <div class="ty-hearts" id="tyHearts">♡ ♡ ♡</div>
+          <p class="ty-hint">Screenshot this and send it back &#128236;</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+  /* ── Splash ── */
+  setTimeout(function() {
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(function() {
+      document.getElementById('splash').style.display = 'none';
+      document.getElementById('main').classList.add('show');
+    }, 900);
+  }, 2400);
+
+  /* ── Populate details ── */
+  function formatDate(d) {
+    if (!d) return '';
+    var parts = d.split('-');
+    var y = parts[0], m = parts[1], day = parts[2];
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var dateObj = new Date(parseInt(y), parseInt(m)-1, parseInt(day));
+    return days[dateObj.getDay()] + ', ' + months[parseInt(m)-1] + ' ' + parseInt(day) + ', ' + y;
+  }
+  function formatTime(t) {
+    if (!t) return '';
+    var parts = t.split(':');
+    var hr = parseInt(parts[0]), min = parts[1];
+    var ampm = hr >= 12 ? 'PM' : 'AM';
+    var hr12 = hr % 12 || 12;
+    return hr12 + ':' + min + ' ' + ampm;
+  }
+
+  var params  = new URLSearchParams(window.location.search);
+  var request = params.get('r') || '';
+  var date    = params.get('d') || '';
+  var time    = params.get('t') || '';
+  var place   = params.get('p') || '';
+  var notes   = params.get('n') || '';
+
+  var rows = '';
+  if (request) rows += '<div class="appt-row"><span class="appt-key">Request</span><span class="appt-val">' + request + '</span></div>';
+  if (date)    rows += '<div class="appt-row"><span class="appt-key">Date</span><span class="appt-val">'    + formatDate(date) + '</span></div>';
+  if (time)    rows += '<div class="appt-row"><span class="appt-key">Time</span><span class="appt-val">'    + formatTime(time) + '</span></div>';
+  if (place)   rows += '<div class="appt-row"><span class="appt-key">The spot</span><span class="appt-val">' + place + '</span></div>';
+  if (notes)   rows += '<div class="appt-row"><span class="appt-key">Notes</span><span class="appt-val">'   + notes + '</span></div>';
+  document.getElementById('apptDetails').innerHTML = rows;
+
+  /* ── Accept / Decline ── */
+  document.getElementById('btnYes').addEventListener('click', function() { respond('accepted'); });
+  document.getElementById('btnNo').addEventListener('click',  function() { respond('declined'); });
+
+  function respond(status) {
+    document.getElementById('btnYes').disabled = true;
+    document.getElementById('btnNo').disabled  = true;
+
+    setTimeout(function() {
+      document.getElementById('appointmentView').style.display = 'none';
+      var ty = document.getElementById('thankYou');
+      ty.style.display = 'block';
+
+      if (status === 'accepted') {
+        document.getElementById('tyEmoji').innerHTML  = '&#9825;';
+        document.getElementById('tyTitle').textContent = 'Appointment Accepted!';
+        document.getElementById('tySub').innerHTML    = 'See you soon &#9825;<br>We can\'t wait!';
+        document.getElementById('tyHearts').textContent = '♡ ♡ ♡';
+      } else {
+        ty.classList.add('ty-declined');
+        document.getElementById('tyEmoji').textContent  = '🤍';
+        document.getElementById('tyTitle').textContent  = 'Appointment Declined';
+        document.getElementById('tySub').textContent    = 'No worries at all.\nHope to see you another time!';
+        document.getElementById('tyHearts').textContent = '♡ ♡ ♡';
+      }
+    }, 300);
+  }
+</script>
+</body>
+</html>
